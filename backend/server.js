@@ -9,7 +9,7 @@ const app = express()
 const PORT = process.env.PORT || 5000
 
 app.use(express.json()) // To Parse request bodies as Json
-
+ 
 app.use('/api/v1/auth', authRouter);
 
 app.listen(PORT, ()=>{

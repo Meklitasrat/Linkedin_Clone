@@ -1,6 +1,9 @@
 import { z } from "zod";
 import { signupSchema } from "../dtos/auth.dto.js";
 import User from "../models/user.model.js";
+import  jwt  from 'jsonwebtoken'
+import bcrypt from "bcryptjs";
+import { sendWelcomeEmail } from "../emails/emailHandlers.js";
 
 export const signup = async(req, res,) => {
   try {
@@ -12,14 +15,45 @@ export const signup = async(req, res,) => {
         return res.status(400).json({message: "Email Already exists"})
     }
 
-    const existingUsername  = User.findOne({username})
+    const existingUsername =  await User.findOne({username})
     if(existingUsername){
         return res.status(400).json({message: "User name already exists"})
     }
 
-  } catch (error) {
+    const salt= await bcrypt.genSalt(10)
+    const hashedPassword = await bcrypt.hash(password , salt)
 
+    const user = new User({
+      name , username , email , password: hashedPassword
+    })
+
+    await user.save();
+
+    const token = jwt.sign({userId: user._id}, process.env.JWT_SECRET,  {expiresIn: "3d"});
+
+    res.cookie('jwt-linkedin' , token, {
+      httpOnly: true, // no accessing this token using js only http so prevents it form cross site attacks xxs
+      maxAge: 3 * 24 * 60  * 60 * 1000,
+      sameSite: "strict", //prevents cross site resource forgery attack
+      secure: process.env.NODE_ENV === "production" ,// becomes true only in production (not in localhost http) Also prevents man-in-the-middle-attack
+    });
+
+    // Let us have a separate try catch for our email sending so that the not being able to send the email won't interfere with the registering the user;
+
+    const profileUrl = process.env.CLIENT_URL +"/profile/" + user.username
+    try{
+      await sendWelcomeEmail(user.email , user.name , profileUrl)
+
+    }catch(errorEmail){
+      console.log("Error while sending email", errorEmail)
+    }
     
+    res.status(201).json({message: "User Registered successfully"})
+
+  } catch (error) {
+    console.log("Error on signup", error.message)
+
+    res.status(500).json({message: "Internal Server Error"})
   }
 }
 
@@ -27,6 +61,7 @@ export const login = (req, res) =>{
     res.send('hey');
 }
 export const logout = (req, res) =>{
-    res.send('hey');
+   res.clearCookie('jwt-linkedin');
+   res.json({message: 'Logged out Successfully'})
 }
 z
