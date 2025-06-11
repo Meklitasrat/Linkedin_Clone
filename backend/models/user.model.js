@@ -51,6 +51,6 @@ const userSchema = new mongoose.Schema({
     }]
 }, {timestamps: true})
 
-const User = mongoose.model("User", userSchema); // Model should always be singular with capitalized beginning, it will be plural in our mongo db when being stored
+const User = mongoose.model("User", userSchema); // Model should always be singular with capitalized beginning, it will be plural in our mongo db when being stored 
 
 export default User;

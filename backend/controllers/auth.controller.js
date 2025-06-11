@@ -1,5 +1,4 @@
-import { z } from "zod";
-import { signupSchema } from "../dtos/auth.dto.js";
+import { loginSchema, signupSchema } from "../dtos/auth.dto.js";
 import User from "../models/user.model.js";
 import  jwt  from 'jsonwebtoken'
 import bcrypt from "bcryptjs";
@@ -57,11 +56,49 @@ export const signup = async(req, res,) => {
   }
 }
 
-export const login = (req, res) =>{
-    res.send('hey');
+export const login = async(req, res) =>{
+  try {
+    const body = req.body;
+    const {username , password} = loginSchema.parse(body);
+ 
+    const user = await User.findOne({username})
+    
+    if(!user){
+      return res.status(404).json({message: "You need to Signup First"})
+    }
+
+    const isMatch = await bcrypt.compare(password , user.password)
+
+    if(!isMatch){
+      return res.status(400).json({message: "Invalid credentials."})
+    }
+
+    const token = jwt.sign({userid: user._id}, process.env.JWT_SECRET, {expiresIn: "3d"});
+    await res.cookie('jwt-linkedin', token, {
+      httpOnly: true,
+      maxAge: 3 * 24 * 60 *60* 100,
+      sameSite: 'strict',
+      secure: process.env.NODE_ENV === 'production'
+    })
+
+    res.json({message: "Logged in successfully"})
+    
+  } catch (error) {
+    console.log("Error while logging in :" , error)
+    res.status(500).json({message: error.message})
+  }
+    
 }
 export const logout = (req, res) =>{
    res.clearCookie('jwt-linkedin');
    res.json({message: 'Logged out Successfully'})
 }
-z
+
+export const getCurrentUser = async(req , res) =>{
+  try {
+    res.json(req.user)
+  } catch (error) {
+    console.log("Error while getting current user :" ,error)
+    return res.status(500).json({message: error.message})
+  }
+}
