@@ -1,6 +1,5 @@
-import { email } from "zod/v4"
 import { mailtrapClient, sender } from "../lib/mailtrap.js"
-import { createCommentNotificationEmailTemplate, createWelcomeEmailTemplate } from "./emailTemplate.js"
+import { createCommentNotificationEmailTemplate, createConnectionAcceptedEmailTemplate, createWelcomeEmailTemplate } from "./emailTemplate.js"
 
 export const sendWelcomeEmail = async(email , name , profileUrl) =>{
 
@@ -40,6 +39,24 @@ export const sendCommentNotification = async(
 
         console.log('Comment email sent successfully', response);
 
+    } catch (error) {
+        throw error
+    }
+}
+
+export const sendConnectionAcceptedEmail = async(senderEmail , senderName , recipientName , profileUrl) =>{
+    const recipient = [{email: senderEmail}]
+
+    try {
+        const response = await mailtrapClient.send({
+            from: senderEmail,
+            to: recipient,
+            subject: `${recipientName} accepted your request!`,
+            html: createConnectionAcceptedEmailTemplate(senderName , recipientName , profileUrl),
+            category: 'connection_accepted'
+        })
+
+        console.log('email sent successfully', response)
     } catch (error) {
         throw error
     }
