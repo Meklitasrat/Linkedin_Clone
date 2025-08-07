@@ -1,9 +1,9 @@
-import jwt, { decode } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import User from '../models/user.model.js';
 
 export const protectRoute = async(req, res, next) =>{
     try {
-        const token = res.cookie('jwt-linkedin') // app.use(cookieParser) in our main file must be written to extract the cookie.
+        const token = req.cookies["jwt-linkedin"] // app.use(cookieParser) in our main file must be written to extract the cookie.
 
         if(!token){
             return res.status(401).json({message: 'No token Provided'});
@@ -14,7 +14,7 @@ export const protectRoute = async(req, res, next) =>{
             return res.status(401).json({message: 'Invalid token'})
         }
 
-        const user = await User.findById(decode.userid).select('-password') // so that we won't select the password all together
+        const user = await User.findById(decoded.userId).select('-password') // so that we won't select the password all together
 
         if(!user){
             return res.status(404).json({message: 'User not found'})

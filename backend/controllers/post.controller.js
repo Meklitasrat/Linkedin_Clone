@@ -5,12 +5,12 @@ import Post from "../models/post.model.js"
 
 export const getFeedPost = async(req , res) => {
     try {
-        const posts = Post.find({author: {$in: req.user.connections}})
+        const posts = await Post.find({author: {$in:[...req.user.connections , req.user._id] }})
         .populate('author', 'name username profilePicture headline')
         .populate('comments.user', 'name profilePicture')
         .sort({createdAt: -1});
         
-        res.status(200).json(posts);
+         res.status(200).json(posts);
     } catch (error) {
         console.log('Error while getting feed posts controller', error);
         res.status(500).json({message: error.message})
@@ -58,13 +58,13 @@ export const deletePost = async(req, res) =>{
             return res.status(401).json({message: 'Post not found'})
         }
         
-        if(Post.author.toString() !== userId.toString()){
+        if(deletedPost.author.toString() !== userId.toString()){
             return res.status(403).json({message: 'You are not authorized to delete this post'})
         }
 
         //if the post has an image (url stored in db also in cloudinary)
 
-        if(Post.image){
+        if(deletedPost.image){
         // https://res.cloudinary.com/dhqy3axid/image/upload/v1749586170/cld-sample-5.jpg
         // to delete an image from cloudinary we can extract the id from it and delete using that;
 

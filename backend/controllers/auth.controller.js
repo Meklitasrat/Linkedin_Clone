@@ -3,6 +3,9 @@ import User from "../models/user.model.js";
 import  jwt  from 'jsonwebtoken'
 import bcrypt from "bcryptjs";
 import { sendWelcomeEmail } from "../emails/emailHandlers.js";
+import env from 'dotenv';
+
+env.config();
 
 export const signup = async(req, res,) => {
   try {
@@ -73,7 +76,7 @@ export const login = async(req, res) =>{
       return res.status(400).json({message: "Invalid credentials."})
     }
 
-    const token = jwt.sign({userid: user._id}, process.env.JWT_SECRET, {expiresIn: "3d"});
+    const token = jwt.sign({userId: user._id}, process.env.JWT_SECRET, {expiresIn: "3d"});
     await res.cookie('jwt-linkedin', token, {
       httpOnly: true,
       maxAge: 3 * 24 * 60 *60* 100,
