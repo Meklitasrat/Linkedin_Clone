@@ -7,6 +7,7 @@ import toast, { Toaster } from "react-hot-toast"
 import { useQuery } from "@tanstack/react-query"
 import axiosInstance from "./lib/axios"
 import { Loader } from "lucide-react"
+import NotificationsPage from "./pages/NotificationsPage"
 
 function App() {
   const {data: user, isLoading} = useQuery({
@@ -26,8 +27,6 @@ function App() {
     retry: false
   });
 
-  console.log("app", user)
-
   if(isLoading) return(<div className="flex justify-center items-center h-screen"> 
     <Loader/> 
   </div>)
@@ -36,6 +35,7 @@ function App() {
       <Route path="/" element={ user ? <HomePage/>: <Navigate to={'/login'}/>}> </Route>
       <Route path="/signup" element={!user ? <Signup/> : <Navigate to={'/'}/>}> </Route>
       <Route path="/login" element={ !user ?<Login/> : <Navigate to={'/'}/>}> </Route>
+      <Route path="/notifications" element={ user ?<NotificationsPage/> : <Navigate to={'/login'}/>}> </Route>
     </Routes>
     <Toaster/>
   </Layout>

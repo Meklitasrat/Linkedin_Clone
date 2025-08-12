@@ -51,7 +51,7 @@ const HomePage = () => {
 
       {recommendedUsers?.length > 0 && (
         <div className="col-span-1 lg:col-span-1 hidden lg:block"> 
-          <div className="bg-slate-200 rounded-lg shadow p-4"> 
+          <div className="bg-slate-100 rounded-lg shadow p-4"> 
             <h2 className="font-semibold mb-4"> People you may know</h2>
             {recommendedUsers?. map((user) =>(
               <RecommendedUser key={user._id} user={user}/>

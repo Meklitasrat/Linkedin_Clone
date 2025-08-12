@@ -68,7 +68,7 @@ export const deletePost = async(req, res) =>{
         // https://res.cloudinary.com/dhqy3axid/image/upload/v1749586170/cld-sample-5.jpg
         // to delete an image from cloudinary we can extract the id from it and delete using that;
 
-        await cloudinary.uploader.destroy(Post.image.split('/').pop().split('.')[0])
+        await cloudinary.uploader.destroy(deletedPost.image.split('/').pop().split('.')[0])
         }
 
         await Post.findByIdAndDelete(postId);
@@ -99,47 +99,62 @@ export const getPostById = async(req, res) =>{
         res.status(500).json({message: error.message})
     }
 }
+export const createComment = async (req, res) => {
+    try {
+        const postId = req.params.id;
+        const { content } = req.body;
 
-export const createComment = async(req, res) =>{
-    try{
-        const postId = req.params.id
+        if (!content || !content.trim()) {
+            return res.status(400).json({ message: "Comment content is required" });
+        }
 
-        const {content} = req.body
-
-        const post = await Post.findOneAndUpdate(postId , 
+        const post = await Post.findByIdAndUpdate(
+            postId,
             {
-            $push: {comments: {user: req.user._id}, content},
+                $push: {
+                    comments: {
+                        user: req.user._id,
+                        content
+                    }
+                }
             },
-            {new: true}
-        ).populate('author', 'name username headline, profilePicture')
+            { new: true }
+        )
+        .populate('author', 'name username headline profilePicture')
+        .populate('comments.user', 'name profilePicture');
 
-        // Send notification if I didn't not comment on my own post
-
-        if(post.author.toString() !== user.req._id.toString()){
+        // Send notification only if the commenter isn't the post's author
+        if (post.author._id.toString() !== req.user._id.toString()) {
             const newNotification = new Notification({
-                recipient: post.author,
+                recipient: post.author._id,
                 type: 'comment',
-                relatedUser:req.user._id,
+                relatedUser: req.user._id,
                 relatedPost: postId
-            })
+            });
 
-            await newNotification.save()
-            // we'll send an email but should be in its own try catch since we don't want the whole thing failing just cause we couldn't send an email.
+            await newNotification.save();
 
             try {
-                const postUrl = process.env.CLIENT_URL + '/post' + postId
-                await sendCommentNotification(post.author.email ,post.author.name, req.user.name, postUrl, content )
+                const postUrl = `${process.env.CLIENT_URL}/post/${postId}`;
+                await sendCommentNotification(
+                    post.author.email,
+                    post.author.name,
+                    req.user.name,
+                    postUrl,
+                    content
+                );
             } catch (error) {
-                console.log('Error while sending notification email')
+                console.log('Error while sending notification email', error);
             }
         }
 
-        res.status(200).json(post)
-    } catch (error){
-        console.log('Error commenting', error)
-        res.status(500).json({message: error.message})
+        res.status(200).json(post);
+    } catch (error) {
+        console.log('Error commenting', error);
+        res.status(500).json({ message: error.message });
     }
-}
+};
+
 
 export const likePost = async(req, res) =>{
     try {
@@ -147,12 +162,12 @@ export const likePost = async(req, res) =>{
         const post = await Post.findById(postId)
         const userId = req.user._id
 
-        if(post.like.includes(userId)){
+        if(post.likes.includes(userId)){
             // If user already in like means it wants to unlike a post
-            post.like = post.like.filter(id => id.toString() !== userId.toString())
+            post.likes = post.likes.filter((id) => id.toString() !== userId.toString());
         }else{
             // like the post 
-            post.like.push(userId.toString())
+            post.likes.push(userId)
             // we can create a notification if user if not liking its own post
             if(post.author.toString() !== userId.toString()){
                 const newNotification = new Notification({
@@ -165,8 +180,11 @@ export const likePost = async(req, res) =>{
                 await newNotification.save();
             }
             
-            await post.save()
-        }
+        };
+
+         await post.save();
+            
+         res.status(200).json(post);
     } catch (error) {
         console.log('Error liking a post')
         res.status(201).json({message: error.message})

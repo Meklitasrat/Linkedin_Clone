@@ -57,8 +57,12 @@ export const acceptConnectionRequest = async(req , res) =>{
             return res.status(404).json({message: 'Connection request not found'})
         }
 
+        console.log('UserId:', userId);
+        console.log('RecipientId:', connection.recipient._id.toString());
+
+
         // we cannot accept requests that are not for us
-        if(connection.recipient._id.toString() !== userId){
+        if(connection.recipient._id.toString() !== userId.toString()){
             return res.status(403).json({message: 'You are not authorized to accept the request'})
         }
         
@@ -184,6 +188,10 @@ export const getConnectionStatus = async(req , res) =>{
 
         const currentUser = req.user;
 
+        if(currentUser.connections.includes(targetUserId)) {
+            return res.json({status: "connected"})
+        }
+
         const pendingRequest = await ConnectionRequest.findOne({
             $or: [
                 {sender: currentUserId , recipient: targetUserId},
@@ -194,15 +202,15 @@ export const getConnectionStatus = async(req , res) =>{
 
         if(pendingRequest){
             if(pendingRequest.sender.toString() === currentUserId.toString()){
-                return res.json({status: 'pending'})
+                return res.json({status: 'pending', requestId: pendingRequest._id})
             }else{
-                return res.json({status: 'received'})
+                return res.json({status: 'received', requestId: pendingRequest._id})
             }
         };
 
         // if no connection is found between the users:
 
-        res.json({status: 'No request connection found'});
+        res.json({status: 'not connected'}); 
 
     } catch (error) {
         console.log('Failed to get connection status', error.message);
