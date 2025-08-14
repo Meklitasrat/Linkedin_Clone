@@ -24,6 +24,6 @@ export const protectRoute = async(req, res, next) =>{
         next()
     } catch (error) {
         console.log("Error in ProtectRoute middleware:", error.message);
-        return res.status(500).json({message: "Error while authenticating"})
+        return res.status(500).json({message: "Error while authenticating || Please Check your internet connection"})
     }
 }

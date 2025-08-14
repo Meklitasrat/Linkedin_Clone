@@ -26,7 +26,7 @@ const userSchema = new mongoose.Schema({
     },
     location: {
         type: String,
-        default: ""
+        default: "Earth"
     },
     about: {
         type: String,

@@ -62,6 +62,7 @@ const Post = ({post}) => {
         },
         onSuccess : () =>{
             queryClient.invalidateQueries({queryKey:['posts']});
+             queryClient.invalidateQueries({queryKey:['post', post._id]});
         },
         onError: (error) =>{
             toast.error(error.response.data.message || "Failed to add a comment")
@@ -134,7 +135,7 @@ const Post = ({post}) => {
             </button>
         )}
       </div>
-      <p className="mb-4"> {post.comment}</p>
+      <p className="mb-4"> {post.content}</p>
       {post.image && (<img src={post.image} alt='Post comment' className="rounded-lg w-full mb-4"/>)}
 
       <div className="flex justify-between text-gray-500">
@@ -145,7 +146,7 @@ const Post = ({post}) => {
         />
 
         <PostAction
-            icon={<MessageCircle size={18} className={isLiked ? "text-blue-500 fill-blue-300" : ""}/>}
+            icon={<MessageCircle size={18} />}
             text={`Comment (${comments?.length})`}
             onClick={() => setShowComments(!showComments)}
         />

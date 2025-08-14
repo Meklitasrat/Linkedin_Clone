@@ -9,16 +9,20 @@ import { connectDB } from './lib/db.js';
 import { protectRoute } from './middleware/auth.middleware.js';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
+import path from 'path';
 
 dotenv.config()
 
 const app = express()
 const PORT = process.env.PORT || 5000
+const __dirname = path.resolve();
 
-app.use(cors({
-    origin: 'http://localhost:5173',
-    credentials: true
-}));
+if(process.env.NODE_ENV !== "production"){
+    app.use(cors({
+        origin: 'http://localhost:5173',
+        credentials: true
+    }))
+}
 
 app.use(express.json({limit: '5mb'}))  // To Parse request bodies as Json and will limit payload data.
 app.use(cookieParser());
@@ -29,6 +33,17 @@ app.use('/api/v1/users', userRouter)
 app.use('/api/v1/posts', postRouter)
 app.use('/api/v1/notifications', notificationRouter)
 app.use('/api/v1/connections', connectionRequestRouter)
+
+// if we are on production we want to use the dist (static file)
+
+if(process.env.NODE_ENV === "production"){
+    app.use(express.static(path.join(__dirname , '/frontend/dist')));
+    // then to be able to serve both front and back from the same port/domain and serve the index.html
+
+    app.get("*" , (req , res) =>{
+        res.sendFile(path.resolve(__dirname , "frontend" , "dist", "index.html"))
+    })
+}
 app.listen(PORT, ()=>{
     console.log(`Server listening on port ${PORT}`)
     connectDB()

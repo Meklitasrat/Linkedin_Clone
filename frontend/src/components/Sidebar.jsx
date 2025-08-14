@@ -6,7 +6,7 @@ export default function Sidebar({ user }) {
 		<div className='bg-secondary rounded-lg shadow'>
 			<div className='p-4 text-center'>
 				<div
-					className='h-16 rounded-t-lg bg-cover bg-center'
+					className='h-16 rounded-t-lg  bg-center'
 					style={{
 						backgroundImage: `url("${user.bannerImg || "/banner.png"}")`,
 					}}
@@ -28,7 +28,7 @@ export default function Sidebar({ user }) {
 						<li>
 							<Link
 								to='/'
-								className='flex items-center py-2 px-4 rounded-md hover:bg-primary hover:text-white transition-colors'
+								className='flex items-center py-2 px-4 rounded-md hover:bg-blue-500 hover:text-white transition-colors'
 							>
 								<Home className='mr-2' size={20} /> Home
 							</Link>
@@ -36,7 +36,7 @@ export default function Sidebar({ user }) {
 						<li>
 							<Link
 								to='/network'
-								className='flex items-center py-2 px-4 rounded-md hover:bg-primary hover:text-white transition-colors'
+								className='flex items-center py-2 px-4 rounded-md hover:bg-blue-500 hover:text-white transition-colors'
 							>
 								<UserPlus className='mr-2' size={20} /> My Network
 							</Link>
@@ -44,7 +44,7 @@ export default function Sidebar({ user }) {
 						<li>
 							<Link
 								to='/notifications'
-								className='flex items-center py-2 px-4 rounded-md hover:bg-primary hover:text-white transition-colors'
+								className='flex items-center py-2 px-4 rounded-md hover:bg-blue-500 hover:text-white transition-colors'
 							>
 								<Bell className='mr-2' size={20} /> Notifications
 							</Link>

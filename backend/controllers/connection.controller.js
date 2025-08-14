@@ -57,10 +57,6 @@ export const acceptConnectionRequest = async(req , res) =>{
             return res.status(404).json({message: 'Connection request not found'})
         }
 
-        console.log('UserId:', userId);
-        console.log('RecipientId:', connection.recipient._id.toString());
-
-
         // we cannot accept requests that are not for us
         if(connection.recipient._id.toString() !== userId.toString()){
             return res.status(403).json({message: 'You are not authorized to accept the request'})
@@ -86,9 +82,9 @@ export const acceptConnectionRequest = async(req , res) =>{
             type: 'connectionAccepted'
 
         })
-
+        
         await notification.save();
-
+        res.json({ message: "Connection accepted successfully" });
         const senderEmail = connection.sender.email
         const senderName = connection.sender.name
         const recipientName = connection.recipient.name
