@@ -106,7 +106,6 @@ const Post = ({post}) => {
         likePost()
     }
 
-    console.log('The post', post.createdAt)
   return (
 		<div className='bg-gray-50 rounded-lg shadow mb-4'>
 			<div className='p-4'>

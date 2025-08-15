@@ -10,12 +10,14 @@ import { protectRoute } from './middleware/auth.middleware.js';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
 dotenv.config()
 
 const app = express()
 const PORT = process.env.PORT || 5000
-const __dirname = path.resolve();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.resolve(__filename);
 
 if(process.env.NODE_ENV !== "production"){
     app.use(cors({
@@ -36,14 +38,19 @@ app.use('/api/v1/connections', connectionRequestRouter)
 
 // if we are on production we want to use the dist (static file)
 
-if(process.env.NODE_ENV === "production"){
-    app.use(express.static(path.join(__dirname , '/frontend/dist')));
-    // then to be able to serve both front and back from the same port/domain and serve the index.html
+if (process.env.NODE_ENV === 'production') {
+  const frontendPath = path.join(__dirname, '..', 'frontend', 'dist');
+  app.use(express.static(frontendPath));
 
-    app.get("*" , (req , res) =>{
-        res.sendFile(path.resolve(__dirname , "frontend" , "dist", "index.html"))
-    })
+  app.get('/', (req, res) => {
+    res.sendFile(path.join(frontendPath, 'index.html'));
+  });
+
+  app.get('/', (req, res) => {
+    res.sendFile(path.join(frontendPath, 'index.html'));
+  });
 }
+
 app.listen(PORT, ()=>{
     console.log(`Server listening on port ${PORT}`)
     connectDB()
