@@ -11,6 +11,9 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import passport from 'passport';
+import session from 'express-session';
+import './middleware/passport.js';
 
 dotenv.config()
 
@@ -19,9 +22,25 @@ const PORT = process.env.PORT || 5000
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.resolve(__filename);
 
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "default secret",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: process.env.NODE_ENV === 'production',
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
+  })
+);
+
+app.use(passport.initialize());
+app.use(passport.session());
+
 if(process.env.NODE_ENV !== "production"){
     app.use(cors({
-        origin: 'http://localhost:5173',
+        origin: ['http://localhost:5173', 'http://localhost:3000'],
         credentials: true
     }))
 }

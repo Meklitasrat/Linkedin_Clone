@@ -6,7 +6,7 @@ import HomePage from "./pages/auth/HomePage"
 import toast, { Toaster } from "react-hot-toast"
 import { useQuery } from "@tanstack/react-query"
 import axiosInstance from "./lib/axios"
-import { Loader } from "lucide-react"
+import { Home, Loader } from "lucide-react"
 import NotificationsPage from "./pages/NotificationsPage"
 import NetworkPage from "./pages/NetworkPage"
 import PostPage from "./pages/PostPage"
@@ -36,7 +36,7 @@ function App() {
   return <Layout> 
     <Routes>
       <Route path="/" element={ user ? <HomePage/>: <Navigate to={'/signup'}/>}> </Route>
-      <Route path="/signup" element={ <Signup/>}> </Route>
+      <Route path="/signup" element={!user ? (<Signup/>): <HomePage/>}> </Route>
       <Route path="/login" element={ !user ?<Login/> : <Navigate to={'/'}/>}> </Route>
       <Route path="/notifications" element={ user ?<NotificationsPage/> : <Navigate to={'/login'}/>}> </Route>
       <Route path="/network" element={ user ?<NetworkPage/> : <Navigate to={'/login'}/>}> </Route>
